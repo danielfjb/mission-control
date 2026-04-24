@@ -1,4 +1,3 @@
-import React from 'react';
 import { ProjectStatus } from '../../types';
 
 const CONFIG: Record<ProjectStatus, { label: string; color: string }> = {

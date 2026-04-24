@@ -1,4 +1,3 @@
-import React from 'react';
 
 export function ProgressBar({ value }: { value: number }) {
   const clamped = Math.min(100, Math.max(0, value));

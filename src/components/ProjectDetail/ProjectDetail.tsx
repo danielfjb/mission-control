@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useProject } from '../../hooks/useProject';
-import { ProjectService } from '../../services/ProjectService';
 import { ProjectFormData } from '../../types';
 import { ProjectForm } from '../shared/ProjectForm';
 import { StatusBadge } from '../shared/StatusBadge';
