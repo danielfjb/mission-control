@@ -47,6 +47,10 @@ export const ProjectService = {
     return ProjectRepository.deleteMilestone(uid, pid, milestoneId);
   },
 
+  async reorderMilestones(uid: string, pid: string, orderedIds: string[]): Promise<void> {
+    return ProjectRepository.reorderMilestones(uid, pid, orderedIds);
+  },
+
   async addProgressEntry(uid: string, pid: string, content: string): Promise<void> {
     if (!content.trim()) throw new Error('Progress entry cannot be empty');
     return ProjectRepository.addProgressEntry(uid, pid, content);

@@ -17,6 +17,7 @@ function formatDate(iso: string): string {
 export function ProgressPanel({ currentFocus, history, onAddEntry }: Props) {
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   const handleSave = async () => {
     if (!text.trim()) return;
@@ -107,7 +108,7 @@ export function ProgressPanel({ currentFocus, history, onAddEntry }: Props) {
             HISTORY ({history.length})
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {history.map((entry, i) => (
+            {history.slice(0, showAllHistory ? undefined : 3).map((entry, i) => (
               <div
                 key={entry.id}
                 style={{
@@ -126,6 +127,24 @@ export function ProgressPanel({ currentFocus, history, onAddEntry }: Props) {
               </div>
             ))}
           </div>
+          {history.length > 3 && (
+            <button
+              onClick={() => setShowAllHistory(!showAllHistory)}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#6b7280',
+                padding: '6px 12px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                fontFamily: 'monospace',
+                marginTop: '12px',
+              }}
+            >
+              {showAllHistory ? 'SHOW LESS' : `SHOW ${history.length - 3} MORE`}
+            </button>
+          )}
         </div>
       )}
     </div>

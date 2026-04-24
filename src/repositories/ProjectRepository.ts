@@ -116,28 +116,55 @@ export const ProjectRepository = {
   // — Milestones —
 
   async getMilestones(uid: string, pid: string): Promise<Milestone[]> {
-    const q = query(milestonesPath(uid, pid), orderBy('createdAt', 'asc'));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => ({
+    // Get all milestones without orderBy to include docs without priority field
+    const snap = await getDocs(milestonesPath(uid, pid));
+    const milestones = snap.docs.map((d) => ({
       id: d.id,
       title: d.data().title,
       completed: d.data().completed,
       dueDate: d.data().dueDate,
+      priority: d.data().priority ?? 999,
       createdAt: toDate(d.data().createdAt),
     }));
+    // Sort by priority, then by createdAt for items without priority
+    return milestones.sort((a, b) => a.priority - b.priority || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   },
 
   async addMilestone(uid: string, pid: string, data: MilestoneFormData): Promise<string> {
-    const ref = await addDoc(milestonesPath(uid, pid), {
-      ...data,
+    // Get current max priority
+    const milestones = await ProjectRepository.getMilestones(uid, pid);
+    const maxPriority = milestones.length > 0 ? Math.max(...milestones.map(m => m.priority)) : 0;
+    
+    // Build document data without undefined fields (Firestore doesn't allow undefined)
+    const docData: any = {
+      title: data.title,
+      completed: data.completed,
+      priority: maxPriority + 1,
       createdAt: serverTimestamp(),
-    });
+    };
+    
+    // Only include dueDate if it's provided
+    if (data.dueDate) {
+      docData.dueDate = data.dueDate;
+    }
+    
+    const ref = await addDoc(milestonesPath(uid, pid), docData);
     await updateDoc(projectPath(uid, pid), { updatedAt: serverTimestamp() });
     return ref.id;
   },
 
   async updateMilestone(uid: string, pid: string, mid: string, data: Partial<Milestone>): Promise<void> {
     await updateDoc(doc(db, 'users', uid, 'projects', pid, 'milestones', mid), data);
+    await updateDoc(projectPath(uid, pid), { updatedAt: serverTimestamp() });
+  },
+
+  async reorderMilestones(uid: string, pid: string, orderedIds: string[]): Promise<void> {
+    const updates = orderedIds.map((id, index) => ({ id, priority: index }));
+    await Promise.all(
+      updates.map(({ id, priority }) =>
+        updateDoc(doc(db, 'users', uid, 'projects', pid, 'milestones', id), { priority })
+      )
+    );
     await updateDoc(projectPath(uid, pid), { updatedAt: serverTimestamp() });
   },
 

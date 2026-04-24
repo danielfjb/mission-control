@@ -16,7 +16,7 @@ interface Props {
 }
 
 export function ProjectDetail({ uid, projectId, onBack, onDelete, onUpdate }: Props) {
-  const { project, loading, error, addMilestone, toggleMilestone, deleteMilestone, addProgressEntry } = useProject(uid, projectId);
+  const { project, loading, error, addMilestone, toggleMilestone, deleteMilestone, reorderMilestones, addProgressEntry } = useProject(uid, projectId);
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -49,6 +49,22 @@ export function ProjectDetail({ uid, projectId, onBack, onDelete, onUpdate }: Pr
 
   return (
     <div style={{ minHeight: '100vh', background: '#0d1117', color: '#e5e7eb', fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
+      <style>
+        {`
+          @media (max-width: 768px) {
+            .project-detail-grid {
+              grid-template-columns: 1fr !important;
+              gap: 24px !important;
+            }
+            .project-detail-grid > div:first-child {
+              order: 1;
+            }
+            .project-detail-grid > div:last-child {
+              order: 2;
+            }
+          }
+        `}
+      </style>
       {/* Header */}
       <div style={{
         borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -156,23 +172,8 @@ export function ProjectDetail({ uid, projectId, onBack, onDelete, onUpdate }: Pr
         )}
 
         {/* Two-column layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-          {/* Left: Milestones */}
-          <div style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: '6px',
-            padding: '20px',
-          }}>
-            <MilestonesPanel
-              milestones={project.milestones}
-              onAdd={(title, dueDate) => addMilestone({ title, completed: false, dueDate })}
-              onToggle={toggleMilestone}
-              onDelete={deleteMilestone}
-            />
-          </div>
-
-          {/* Right: Progress */}
+        <div className="project-detail-grid" style={{ display: 'grid', gridTemplateColumns: '3fr 1.2fr', gap: '32px' }}>
+          {/* Left: Progress (Where I'm at) - 3/4 space */}
           <div style={{
             background: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.07)',
@@ -183,6 +184,22 @@ export function ProjectDetail({ uid, projectId, onBack, onDelete, onUpdate }: Pr
               currentFocus={project.currentFocus}
               history={project.progressHistory}
               onAddEntry={addProgressEntry}
+            />
+          </div>
+
+          {/* Right: Milestones - 1/4 space but bigger */}
+          <div style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: '6px',
+            padding: '20px',
+          }}>
+            <MilestonesPanel
+              milestones={project.milestones}
+              onAdd={(title, dueDate) => addMilestone({ title, completed: false, dueDate, priority: 999 })}
+              onToggle={toggleMilestone}
+              onDelete={deleteMilestone}
+              onReorder={reorderMilestones}
             />
           </div>
         </div>

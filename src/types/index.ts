@@ -5,6 +5,7 @@ export interface Milestone {
   title: string;
   completed: boolean;
   dueDate?: string;
+  priority: number; // lower = higher priority
   createdAt: string;
 }
 

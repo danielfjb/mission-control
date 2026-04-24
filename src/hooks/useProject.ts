@@ -41,11 +41,17 @@ export function useProject(uid: string | null, pid: string | null) {
     await load();
   };
 
+  const reorderMilestones = async (orderedIds: string[]) => {
+    if (!uid || !pid) return;
+    await ProjectService.reorderMilestones(uid, pid, orderedIds);
+    await load();
+  };
+
   const addProgressEntry = async (content: string) => {
     if (!uid || !pid) return;
     await ProjectService.addProgressEntry(uid, pid, content);
     await load();
   };
 
-  return { project, loading, error, addMilestone, toggleMilestone, deleteMilestone, addProgressEntry, refresh: load };
+  return { project, loading, error, addMilestone, toggleMilestone, deleteMilestone, reorderMilestones, addProgressEntry, refresh: load };
 }
